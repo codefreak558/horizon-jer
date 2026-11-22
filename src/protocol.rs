@@ -6,6 +6,8 @@ use std::sync::OnceLock;
 
 /// The payload channels' version: a change to these types raises it.
 pub const VERSION: &str = "1";
+/// The same version as a number, as `Ask` carries it.
+pub const VERSION_NUMBER: i32 = 1;
 pub const ASK: &str = "jer:ask";
 pub const PAGES: &str = "jer:pages";
 
