@@ -8,7 +8,7 @@ use crate::protocol::{self, Ask, PAGES_TOKEN, Page, Stack};
 use crate::trades;
 use crate::worldgen::{self, FeatureRef};
 use mod_api::serde_json::{self, Value};
-use mod_api::{IPayloadContext, Identifier, PackType, RegistryEntry, ServerHost};
+use mod_api::{IPayloadContext, Identifier, PackType, PayloadWork, RegistryEntry, ServerHost};
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 
@@ -36,7 +36,7 @@ pub fn stopped() {
     *lock(&PAGES) = None;
 }
 
-/// `jer:ask`: build (or reuse) the pages and send them in batches.
+/// `jer:ask`: the pages are built and sent on the server's main thread, where the world can be read.
 pub fn answer(ask: Ask, cx: &mut dyn IPayloadContext) -> Result<(), String> {
     if ask.version != protocol::VERSION_NUMBER {
         return Err(format!(
@@ -44,9 +44,18 @@ pub fn answer(ask: Ask, cx: &mut dyn IPayloadContext) -> Result<(), String> {
             ask.version
         ));
     }
-    let pages = {
+    cx.enqueue_work(Arc::new(SendPages))
+        .map(drop)
+        .map_err(|e| format!("{e:?}"))
+}
+
+/// Builds (or reuses) the pages and sends them to the asking player in batches.
+struct SendPages;
+
+impl PayloadWork for SendPages {
+    fn run(&self, cx: &mut dyn IPayloadContext) -> Result<(), String> {
         let cached = lock(&PAGES).clone();
-        match cached {
+        let pages = match cached {
             Some(pages) => pages,
             None => {
                 let host = cx.server_host().map_err(|e| format!("{e:?}"))?;
@@ -54,15 +63,15 @@ pub fn answer(ask: Ask, cx: &mut dyn IPayloadContext) -> Result<(), String> {
                 *lock(&PAGES) = Some(Arc::clone(&pages));
                 pages
             }
+        };
+        let token = PAGES_TOKEN
+            .get()
+            .ok_or("jer: the pages channel is not registered")?;
+        for batch in protocol::batches(pages.as_ref().clone(), BATCH) {
+            token.reply(cx, &batch).map_err(|e| format!("{e:?}"))?;
         }
-    };
-    let token = PAGES_TOKEN
-        .get()
-        .ok_or("jer: the pages channel is not registered")?;
-    for batch in protocol::batches(pages.as_ref().clone(), BATCH) {
-        token.reply(cx, &batch).map_err(|e| format!("{e:?}"))?;
+        Ok(())
     }
-    Ok(())
 }
 
 fn id(text: &str) -> Option<Identifier> {

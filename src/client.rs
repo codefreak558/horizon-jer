@@ -13,6 +13,8 @@ pub const OPEN: &str = "open";
 
 /// Ticks between two asks while the server hasn't answered or the connection isn't up.
 const RETRY_TICKS: u32 = 100;
+/// Ticks the window keeps trying to open after the screen under it closed.
+const OPEN_RETRIES: u32 = 10;
 /// Enchantment lines on one enchantment page.
 const ENCHANTS_PER_PAGE: usize = 12;
 
@@ -39,6 +41,8 @@ pub struct State {
     pub nav: Nav,
     /// Ticks until the next ask.
     wait: u32,
+    /// Ticks left to retry opening the window (the screen it replaces may take a tick to close).
+    open_retries: u32,
     /// What the input hooks asked of the next tick.
     pub pending: Option<Pending>,
 }
@@ -124,7 +128,18 @@ pub fn tick(host: &mut dyn ClientHost) {
         }
     }
     if host.mod_screen() != Some(ID) {
-        host.mod_screen_open(ID);
+        if host.mod_screen_open(ID) {
+            with(|s| s.open_retries = 0);
+        } else {
+            with(|s| {
+                if s.open_retries < OPEN_RETRIES {
+                    s.open_retries += 1;
+                    s.pending = Some(Pending::Open);
+                } else {
+                    s.open_retries = 0;
+                }
+            });
+        }
     }
     if with(|s| s.nav.here.tab == Tab::Enchant) {
         ensure_enchant_pages(host);
