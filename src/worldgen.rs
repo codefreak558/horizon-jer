@@ -59,12 +59,7 @@ pub fn ore_blocks(configured: &Value) -> Option<Vec<String>> {
         return None;
     }
     let mut blocks = Vec::new();
-    for target in configured
-        .get("config")?
-        .get("targets")?
-        .as_array()?
-        .iter()
-    {
+    for target in configured.get("config")?.get("targets")?.as_array()?.iter() {
         if let Some(name) = target
             .get("state")
             .and_then(|s| s.get("Name"))

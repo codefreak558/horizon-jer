@@ -30,10 +30,19 @@ pub fn table_loaded(id: &str, table: &Value) {
     *lock(&PAGES) = None;
 }
 
+/// The server stopped: the next world loads its own tables.
+pub fn stopped() {
+    lock(&TABLES).clear();
+    *lock(&PAGES) = None;
+}
+
 /// `jer:ask`: build (or reuse) the pages and send them in batches.
 pub fn answer(ask: Ask, cx: &mut dyn IPayloadContext) -> Result<(), String> {
     if ask.version != protocol::VERSION_NUMBER {
-        return Err(format!("jer: client protocol {} not supported", ask.version));
+        return Err(format!(
+            "jer: client protocol {} not supported",
+            ask.version
+        ));
     }
     let pages = {
         let cached = lock(&PAGES).clone();
@@ -212,7 +221,9 @@ fn ore_pages(host: &dyn ServerHost, tables: &BTreeMap<String, Value>) -> Vec<Pag
             continue;
         };
         let configured = match worldgen::feature_of(&placed) {
-            Some(FeatureRef::Id(c)) => read_json(host, &data_path("worldgen/configured_feature", c)),
+            Some(FeatureRef::Id(c)) => {
+                read_json(host, &data_path("worldgen/configured_feature", c))
+            }
             Some(FeatureRef::Inline(v)) => Some(v.clone()),
             None => None,
         };
@@ -313,6 +324,9 @@ mod tests {
             data_path("tags/villager_trade", "minecraft:armorer/level_1"),
             "minecraft:tags/villager_trade/armorer/level_1.json"
         );
-        assert_eq!(data_table("minecraft:iron_ore"), "minecraft:blocks/iron_ore");
+        assert_eq!(
+            data_table("minecraft:iron_ore"),
+            "minecraft:blocks/iron_ore"
+        );
     }
 }

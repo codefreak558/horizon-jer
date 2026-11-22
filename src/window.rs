@@ -109,7 +109,11 @@ impl Painter<'_> {
     }
 
     fn button(&mut self, r: [f32; 4], label: &str, hit: Hit) {
-        let fill = if self.hover(r) { 0xFFA8B4E8 } else { 0xFFA0A0A0 };
+        let fill = if self.hover(r) {
+            0xFFA8B4E8
+        } else {
+            0xFFA0A0A0
+        };
         self.bevel(r, fill, LIGHT, DARK);
         self.centred(label, r[0] + r[2] / 2.0, r[1] + (r[3] - 8.0) / 2.0, TEXT);
         self.hits.push((r, hit));
@@ -136,7 +140,8 @@ impl Painter<'_> {
             self.centred(&label, at[0] + 9.0, at[1] + 19.0, TEXT);
         }
         if self.hover(r) {
-            self.draw.fill([at[0] + 1.0, at[1] + 1.0, 16.0, 16.0], 0x80FFFFFF);
+            self.draw
+                .fill([at[0] + 1.0, at[1] + 1.0, 16.0, 16.0], 0x80FFFFFF);
             self.tooltip = stack_lines(self.host, s);
         }
         self.hits.push((r, Hit::Stack(s.item.clone())));
@@ -146,7 +151,12 @@ impl Painter<'_> {
     fn grid(&mut self, stacks: &[Stack], origin: [f32; 2], cols: usize, rows: usize) {
         let room = cols * rows;
         for (i, s) in stacks.iter().take(room).enumerate() {
-            self.stack(s, cell(origin, cols, i), Some(percent(f64::from(s.chance))), None);
+            self.stack(
+                s,
+                cell(origin, cols, i),
+                Some(percent(f64::from(s.chance))),
+                None,
+            );
         }
         if stacks.len() > room {
             let more = names::tr(
@@ -244,7 +254,12 @@ fn paint(p: &mut Painter<'_>, s: &mut State, size: [f32; 2]) {
             p.draw.item(k, [r[0] + 4.0, r[1] + 3.0], 16.0);
         }
         if p.hover(r) {
-            p.tooltip = vec![names::tr(host, &format!("jer.tab.{}", tab.key()), tab.title(), &[])];
+            p.tooltip = vec![names::tr(
+                host,
+                &format!("jer.tab.{}", tab.key()),
+                tab.title(),
+                &[],
+            )];
         }
         p.hits.push((r, Hit::Tab(*tab)));
     }
@@ -271,7 +286,11 @@ fn paint(p: &mut Painter<'_>, s: &mut State, size: [f32; 2]) {
         p.button([x + 6.0, fy, 18.0, 14.0], "<", Hit::Prev);
         p.button([x + w - 24.0, fy, 18.0, 14.0], ">", Hit::Next);
     }
-    let n = format!("{} / {}", (s.nav.here.screen + 1).min(screens.len()), screens.len());
+    let n = format!(
+        "{} / {}",
+        (s.nav.here.screen + 1).min(screens.len()),
+        screens.len()
+    );
     p.centred(&n, x + w / 2.0, fy + 3.0, TEXT);
     if s.remote == Remote::Asked {
         let loading = names::tr(host, "jer.loading", "Loading...", &[]);
@@ -406,7 +425,12 @@ fn mob(p: &mut Painter<'_>, page: &Page, body: [f32; 4]) {
     let box_r = [bx, by + 2.0, 72.0, 96.0];
     p.bevel(box_r, 0xFF2A2A2A, SLOT_DARK, LIGHT);
     let view = GuiEntityView::new(
-        [box_r[0] + 2.0, box_r[1] + 2.0, box_r[0] + box_r[2] - 2.0, box_r[1] + box_r[3] - 2.0],
+        [
+            box_r[0] + 2.0,
+            box_r[1] + 2.0,
+            box_r[0] + box_r[2] - 2.0,
+            box_r[1] + box_r[3] - 2.0,
+        ],
         mob_size(&page.subject),
         0.0625,
         GuiEntityLook::At(p.mouse),
@@ -426,7 +450,11 @@ fn mob(p: &mut Painter<'_>, page: &Page, body: [f32; 4]) {
         let r = [bx, ny, p.draw.text_width(&line), 9.0];
         p.text(&line, [bx, ny], MUTED);
         if p.hover(r) {
-            let mut lines: Vec<String> = biomes.iter().take(24).map(|b| names::biome(host, b)).collect();
+            let mut lines: Vec<String> = biomes
+                .iter()
+                .take(24)
+                .map(|b| names::biome(host, b))
+                .collect();
             if biomes.len() > 24 {
                 lines.push(format!("+{}", biomes.len() - 24));
             }
@@ -448,7 +476,12 @@ fn ore(p: &mut Painter<'_>, page: &Page, body: [f32; 4]) {
     let g = [bx, by + 24.0, bw, 60.0];
     p.bevel(g, 0xFF1E1E1E, SLOT_DARK, LIGHT);
     if let Some((low, high)) = graph_range(&page.curve, page.bottom) {
-        let max = page.curve.iter().copied().fold(0.0f32, f32::max).max(f32::EPSILON);
+        let max = page
+            .curve
+            .iter()
+            .copied()
+            .fold(0.0f32, f32::max)
+            .max(f32::EPSILON);
         let inner = g[2] - 2.0;
         let span = (high - low).max(1) as f32;
         for px in 0..inner as i32 {
@@ -460,8 +493,10 @@ fn ore(p: &mut Painter<'_>, page: &Page, body: [f32; 4]) {
                 .unwrap_or(0.0);
             let bar = (v / max * (g[3] - 4.0)).round();
             if bar > 0.0 {
-                p.draw
-                    .fill([g[0] + 1.0 + px as f32, g[1] + g[3] - 2.0 - bar, 1.0, bar], BAR);
+                p.draw.fill(
+                    [g[0] + 1.0 + px as f32, g[1] + g[3] - 2.0 - bar, 1.0, bar],
+                    BAR,
+                );
             }
         }
         if p.hover(g) {
@@ -484,7 +519,12 @@ fn ore(p: &mut Painter<'_>, page: &Page, body: [f32; 4]) {
         p.text(&hs, [g[0] + g[2] - hw, ly], MUTED);
         let total: f32 = page.curve.iter().sum();
         let t = format!("{total:.1}");
-        let line = names::tr(host, "jer.ore_total", &format!("{t} blocks per chunk"), &[&t]);
+        let line = names::tr(
+            host,
+            "jer.ore_total",
+            &format!("{t} blocks per chunk"),
+            &[&t],
+        );
         p.centred(&line, g[0] + g[2] / 2.0, ly, MUTED);
     }
     if !page.outputs.is_empty() {
@@ -513,7 +553,12 @@ fn trade_rows(p: &mut Painter<'_>, pages: &[&Page], body: [f32; 4]) {
         }
         let mut notes = Vec::new();
         if let Some(uses) = page.notes.iter().find_map(|n| n.strip_prefix("uses:")) {
-            notes.push(names::tr(host, "jer.uses", &format!("{uses} uses"), &[uses]));
+            notes.push(names::tr(
+                host,
+                "jer.uses",
+                &format!("{uses} uses"),
+                &[uses],
+            ));
         }
         if page.notes.iter().any(|n| n == "conditional") {
             notes.push(names::tr(host, "jer.conditional", "varies", &[]));

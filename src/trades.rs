@@ -39,10 +39,7 @@ pub fn trade(v: &Value) -> Option<Trade> {
         wants: side(v.get("wants"))?,
         also_wants: side(v.get("additional_wants")),
         gives: side(v.get("gives"))?,
-        max_uses: v
-            .get("max_uses")
-            .and_then(Value::as_u64)
-            .map(|n| n as u32),
+        max_uses: v.get("max_uses").and_then(Value::as_u64).map(|n| n as u32),
         conditional: v.get("merchant_predicate").is_some()
             || v.get("given_item_modifiers").is_some()
             || v.get("given_item_modifier").is_some(),
@@ -117,7 +114,10 @@ mod tests {
             .expect("a trade");
         assert_eq!(t.wants.item, "minecraft:emerald");
         assert_eq!((t.wants.low, t.wants.high), (3, 3));
-        assert_eq!((t.gives.item.as_str(), t.gives.low), ("minecraft:iron_ingot", 2));
+        assert_eq!(
+            (t.gives.item.as_str(), t.gives.low),
+            ("minecraft:iron_ingot", 2)
+        );
         assert_eq!(t.max_uses, Some(12));
         assert!(t.also_wants.is_none());
         assert!(!t.conditional);
@@ -139,7 +139,9 @@ mod tests {
     #[test]
     fn ids_resolve_tags_once() {
         let tag = |name: &str| match name {
-            "minecraft:a" => Some(json!({"values": ["minecraft:x", "#minecraft:b", {"id": "minecraft:y", "required": false}]})),
+            "minecraft:a" => Some(
+                json!({"values": ["minecraft:x", "#minecraft:b", {"id": "minecraft:y", "required": false}]}),
+            ),
             "minecraft:b" => Some(json!({"values": ["minecraft:z", "#minecraft:a"]})),
             _ => None,
         };

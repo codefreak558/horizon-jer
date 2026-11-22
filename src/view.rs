@@ -161,14 +161,34 @@ mod tests {
 
     fn sample() -> Vec<Page> {
         let mut pages = vec![
-            page(Tab::Mob, "minecraft:zombie", 0, &["minecraft:rotten_flesh", "minecraft:iron_ingot"]),
+            page(
+                Tab::Mob,
+                "minecraft:zombie",
+                0,
+                &["minecraft:rotten_flesh", "minecraft:iron_ingot"],
+            ),
             page(Tab::Mob, "minecraft:skeleton", 0, &["minecraft:bone"]),
-            page(Tab::Chest, "minecraft:chests/x", 0, &["minecraft:iron_ingot"]),
+            page(
+                Tab::Chest,
+                "minecraft:chests/x",
+                0,
+                &["minecraft:iron_ingot"],
+            ),
         ];
         for _ in 0..8 {
-            pages.push(page(Tab::Trade, "minecraft:armorer", 1, &["minecraft:iron_helmet"]));
+            pages.push(page(
+                Tab::Trade,
+                "minecraft:armorer",
+                1,
+                &["minecraft:iron_helmet"],
+            ));
         }
-        pages.push(page(Tab::Trade, "minecraft:armorer", 2, &["minecraft:bell"]));
+        pages.push(page(
+            Tab::Trade,
+            "minecraft:armorer",
+            2,
+            &["minecraft:bell"],
+        ));
         pages
     }
 

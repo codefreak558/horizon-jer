@@ -14,7 +14,8 @@ fn screen_count() -> usize {
 
 /// Whether `key` (`key.keyboard.j`) is the one bound to the open mapping.
 fn is_open_key(host: &dyn ClientHost, key: &str) -> bool {
-    host.mod_key(client::ID, OPEN).is_some_and(|(k, _)| k == key)
+    host.mod_key(client::ID, OPEN)
+        .is_some_and(|(k, _)| k == key)
 }
 
 /// A look-up of `item` from inside the window.

@@ -42,7 +42,10 @@ pub fn roll_counts(v: Option<&Value>) -> Vec<(u32, f64)> {
     let Some(v) = v else {
         return vec![(1, 1.0)];
     };
-    if let Some(n) = v.as_f64().or_else(|| v.get("value").and_then(Value::as_f64)) {
+    if let Some(n) = v
+        .as_f64()
+        .or_else(|| v.get("value").and_then(Value::as_f64))
+    {
         return vec![(n.max(0.0) as u32, 1.0)];
     }
     if let (Some(n), Some(p)) = (
@@ -324,14 +327,18 @@ mod tests {
 
     #[test]
     fn uniform_rolls_average_their_counts() {
-        let rolls = roll_counts(Some(&json!({"type": "minecraft:uniform", "min": 1, "max": 3})));
+        let rolls = roll_counts(Some(
+            &json!({"type": "minecraft:uniform", "min": 1, "max": 3}),
+        ));
         assert_eq!(rolls.len(), 3);
         assert!((rolls.iter().map(|(_, p)| p).sum::<f64>() - 1.0).abs() < 1e-9);
     }
 
     #[test]
     fn binomial_rolls_sum_to_one() {
-        let rolls = roll_counts(Some(&json!({"type": "minecraft:binomial", "n": 4, "p": 0.3})));
+        let rolls = roll_counts(Some(
+            &json!({"type": "minecraft:binomial", "n": 4, "p": 0.3}),
+        ));
         assert!((rolls.iter().map(|(_, p)| p).sum::<f64>() - 1.0).abs() < 1e-9);
         assert_eq!(rolls.len(), 5);
     }
@@ -416,7 +423,9 @@ mod tests {
         assert_eq!(count_range(None), (1, 1));
         assert_eq!(count_range(Some(&json!(5))), (5, 5));
         assert_eq!(
-            count_range(Some(&json!({"type": "minecraft:uniform", "min": 2, "max": 4}))),
+            count_range(Some(
+                &json!({"type": "minecraft:uniform", "min": 2, "max": 4})
+            )),
             (2, 4)
         );
     }

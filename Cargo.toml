@@ -17,4 +17,7 @@ horizon-mod-api = { path = ".horizon/sdk/api/crates/horizon-mod-api" }
 [package.metadata.horizon]
 sdk = "2b77287de099c9316278ba7ac4d83590fdb7ef30"
 
+# A workspace of its own. The SDK fetched into .horizon/ stays out of it: path dependencies inside the
+# package's folder would otherwise become members, and fmt and clippy would check the SDK's code.
 [workspace]
+exclude = [".horizon"]

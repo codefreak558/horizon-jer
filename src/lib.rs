@@ -24,7 +24,7 @@ use mod_api::{
     ClientHost, ClientPlayerLoggingOutEvent, ClientTickPostEvent, DataLoadContext, Flow, Hooks,
     KeyRegistration, LootTableLoadEvent, PayloadId, Registrar, RegistrationContext,
     ScreenKeyPressedPreEvent, ScreenMouseButtonPressedPreEvent, ScreenMouseScrolledPreEvent,
-    ScreenRenderPostEvent,
+    ScreenRenderPostEvent, ServerHost, ServerStoppedEvent,
 };
 use protocol::{ASK, ASK_TOKEN, Ask, PAGES, PAGES_TOKEN, Pages};
 
@@ -57,6 +57,10 @@ impl Hooks for Jer {
     /// A read-only copy of each loot table; the table is not changed.
     fn loot_table_load(&self, _: &dyn DataLoadContext, event: &mut LootTableLoadEvent<'_>) {
         server::table_loaded(event.id, event.table);
+    }
+
+    fn server_stopped(&self, _: &mut dyn ServerHost, _: &mut ServerStoppedEvent) {
+        server::stopped();
     }
 
     fn client_tick_post(&self, host: &mut dyn ClientHost, _: &mut ClientTickPostEvent) {

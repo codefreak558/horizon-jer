@@ -180,7 +180,10 @@ mod tests {
             classify("minecraft:entities/zombie", &wheat_only),
             Some((Tab::Mob, "minecraft:zombie".into()))
         );
-        assert_eq!(classify("minecraft:entities/sheep/white", &wheat_only), None);
+        assert_eq!(
+            classify("minecraft:entities/sheep/white", &wheat_only),
+            None
+        );
         assert_eq!(
             classify("minecraft:chests/simple_dungeon", &wheat_only).map(|c| c.0),
             Some(Tab::Chest)
@@ -203,12 +206,18 @@ mod tests {
             table_label("minecraft:chests/village/village_weaponsmith"),
             "Village Weaponsmith"
         );
-        assert_eq!(table_label("minecraft:chests/simple_dungeon"), "Simple Dungeon");
+        assert_eq!(
+            table_label("minecraft:chests/simple_dungeon"),
+            "Simple Dungeon"
+        );
         assert_eq!(fallback_name("minecraft:iron_ore"), "Iron Ore");
         assert_eq!(fallback_name("#minecraft:logs"), "#Logs");
         assert_eq!(
             name_keys("item", "minecraft:bone"),
-            ["item.minecraft.bone".to_owned(), "block.minecraft.bone".to_owned()]
+            [
+                "item.minecraft.bone".to_owned(),
+                "block.minecraft.bone".to_owned()
+            ]
         );
     }
 
