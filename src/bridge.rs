@@ -127,7 +127,11 @@ fn recipe(tab: Tab, page: &Page, words: &dyn Words) -> Recipe {
         },
         Tab::Ore => Recipe {
             inputs: with_item(
-                &page.inputs.iter().map(|s| s.item.clone()).collect::<Vec<_>>(),
+                &page
+                    .inputs
+                    .iter()
+                    .map(|s| s.item.clone())
+                    .collect::<Vec<_>>(),
                 1,
                 words,
             )
@@ -138,7 +142,9 @@ fn recipe(tab: Tab, page: &Page, words: &dyn Words) -> Recipe {
         },
         Tab::Trade => Recipe {
             inputs: (page.inputs.iter())
-                .filter_map(|s| with_item(std::slice::from_ref(&s.item), s.low.max(1) as u32, words))
+                .filter_map(|s| {
+                    with_item(std::slice::from_ref(&s.item), s.low.max(1) as u32, words)
+                })
                 .collect(),
             outputs,
             notes: trade_notes(page, words),
@@ -244,11 +250,7 @@ fn enchant_notes(page: &Page, words: &dyn Words) -> Vec<String> {
             } else {
                 "I".to_owned()
             };
-            let power = words.tr(
-                "jer.cost",
-                &format!("power {low}-{high}"),
-                &[low, high],
-            );
+            let power = words.tr("jer.cost", &format!("power {low}-{high}"), &[low, high]);
             Some(format!("{} {levels} ({power})", words.enchantment(id)))
         })
         .collect()

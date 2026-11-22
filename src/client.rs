@@ -158,9 +158,8 @@ fn send_to_jei(host: &mut dyn ClientHost) {
     }
     ensure_enchant_pages(host);
     mod_api::if_installed!(host, jei, {
-        let categories = with(|s| {
-            crate::bridge::categories(&s.pages, &crate::bridge::HostWords(&*host))
-        });
+        let categories =
+            with(|s| crate::bridge::categories(&s.pages, &crate::bridge::HostWords(&*host)));
         for category in categories {
             jei::register_category(
                 &category.id,
