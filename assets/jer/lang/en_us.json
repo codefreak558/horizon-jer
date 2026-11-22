@@ -29,6 +29,7 @@
   "jer.uses": "%s uses",
   "jer.conditional": "varies",
   "jer.cost": "power %s-%s",
+  "jer.peak": "Peak at Y=%s",
   "jer.dim.minecraft:overworld": "Overworld",
   "jer.dim.minecraft:the_nether": "The Nether",
   "jer.dim.minecraft:the_end": "The End",

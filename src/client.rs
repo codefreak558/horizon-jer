@@ -38,6 +38,8 @@ pub struct State {
     pub remote: Remote,
     /// The enchantment pages, built on first use.
     pub enchant_built: bool,
+    /// The pages went to JEI (this world).
+    bridged: bool,
     pub nav: Nav,
     /// Ticks until the next ask.
     wait: u32,
@@ -97,6 +99,7 @@ pub fn tick(host: &mut dyn ClientHost) {
         return;
     }
     ask(host);
+    send_to_jei(host);
     if host.playing() && host.consume_click(ID, OPEN) {
         with(|s| s.pending = Some(Pending::Open));
     }
@@ -144,6 +147,65 @@ pub fn tick(host: &mut dyn ClientHost) {
     if with(|s| s.nav.here.tab == Tab::Enchant) {
         ensure_enchant_pages(host);
     }
+}
+
+/// Once the pages are all in (or the server has none) and the enchantment pages are built, hands them to JEI
+/// as one category per tab. Without JEI installed the block doesn't run, and the window (J) is all there is.
+fn send_to_jei(host: &mut dyn ClientHost) {
+    let ready = with(|s| !s.bridged && matches!(s.remote, Remote::Complete | Remote::Absent));
+    if !ready || !host.playing() {
+        return;
+    }
+    ensure_enchant_pages(host);
+    mod_api::if_installed!(host, jei, {
+        let categories = with(|s| {
+            crate::bridge::categories(&s.pages, &crate::bridge::HostWords(&*host))
+        });
+        for category in categories {
+            jei::register_category(
+                &category.id,
+                &category.title,
+                category.icon,
+                jei::Layout::Chance,
+            );
+            let recipes = category.recipes.iter().map(to_jei).collect();
+            jei::set_chance_recipes(&category.id, recipes);
+        }
+    });
+    with(|s| s.bridged = true);
+}
+
+/// A recipe as JEI's add-on API takes it.
+#[cfg(feature = "jei")]
+fn to_jei(recipe: &crate::bridge::Recipe) -> jei::ChanceRecipe {
+    let stack = |item: &str, count: u32| jei::Stack {
+        count,
+        ..jei::Stack::item(item)
+    };
+    jei::ChanceRecipe {
+        inputs: (recipe.inputs.iter())
+            .map(|slot| slot.iter().map(|(item, n)| stack(item, *n)).collect())
+            .collect(),
+        outputs: (recipe.outputs.iter())
+            .map(|o| jei::Chance {
+                stack: stack(&o.item, 1),
+                chance: o.chance,
+                min: o.min,
+                max: o.max,
+                notes: o.notes.clone(),
+            })
+            .collect(),
+        notes: recipe.notes.clone(),
+    }
+}
+
+/// The world closed: JEI drops its recipes from JER's categories (it keeps the tabs registered).
+pub fn clear_jei(host: &mut dyn ClientHost) {
+    mod_api::if_installed!(host, jei, {
+        for tab in Tab::ALL {
+            jei::clear_category(&crate::bridge::category_id(tab));
+        }
+    });
 }
 
 fn ask(host: &mut dyn ClientHost) {

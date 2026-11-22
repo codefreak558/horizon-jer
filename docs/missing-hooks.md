@@ -35,15 +35,6 @@ gives the API this mod would use, its shape, and what it would unblock. The feat
   mod adds outside `loot_table`). The mod now lists biomes, placed features and trade sets through
   `registry_entries`; if a server answers `None` for one of those registries, that page is empty.
 
-## A recipe viewer to show the pages in
-
-- **Want:** not an SDK hook but a cross-mod API in JEI for Horizon (`jei`): a public function to register a
-  category and feed it chance recipes (`runtime::Category`, `ChanceRecipe` and `Layout::Chance` already exist
-  there, unused). This mod would declare `jei = { version = "^0.4", optional = true }` in `[dependencies]` and
-  call it inside `mod_api::if_installed!`.
-- **Unblocks:** JER's pages inside JEI's recipe screen (R/U on an item), as the original mod is a JEI add-on.
-  Until then the pages live in this mod's own window (J).
-
 ## Data on servers without the mod
 
 - Loot tables, world generation and trades are server data; the vanilla protocol never sends them to a client.

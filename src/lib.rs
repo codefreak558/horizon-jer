@@ -4,6 +4,11 @@
 //! The server half (`server`) keeps a copy of every loot table and reads the world's biome, feature and
 //! trade files; a client asks for the pages once per world (`protocol`) and draws them (`window`). The pure
 //! parts (`loot`, `worldgen`, `trades`, `catalog`, `view`) have no game in them and carry the unit tests.
+// `mod_api::if_installed!` tests a Cargo feature named after the optional dependency (`jei`), which the launcher
+// adds when it builds the mod; a plain `cargo` build doesn't know it.
+#![allow(unexpected_cfgs)]
+
+pub mod bridge;
 pub mod catalog;
 pub mod conditions;
 pub mod loot;
@@ -69,10 +74,11 @@ impl Hooks for Jer {
 
     fn client_player_logging_out(
         &self,
-        _: &mut dyn ClientHost,
+        host: &mut dyn ClientHost,
         _: &mut ClientPlayerLoggingOutEvent,
     ) {
         client::reset();
+        client::clear_jei(host);
     }
 
     fn screen_render_post(&self, host: &dyn ClientHost, event: &mut ScreenRenderPostEvent<'_>) {
