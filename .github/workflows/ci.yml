@@ -33,6 +33,25 @@ jobs:
       - name: test
         run: cargo test
 
+  with-jei:
+    name: clippy and tests with JEI for Horizon installed (the jei feature)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.99.1
+          components: clippy
+      - uses: actions/cache@v4
+        with:
+          path: .horizon/sdk
+          key: sdk-${{ hashFiles('tools/fetch-sdk.sh') }}
+      - name: fetch the SDK
+        run: tools/fetch-sdk.sh
+      # The code inside `mod_api::if_installed!(host, jei, …)` builds only with the feature on.
+      - name: clippy and test with JEI
+        run: tools/check-with-jei.sh
+
   package:
     name: cargo horizon-mod build + check (the registry's package validation)
     runs-on: ubuntu-latest

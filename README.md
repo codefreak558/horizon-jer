@@ -77,6 +77,7 @@ For development:
 cargo test                                   # the loot evaluator, ore heights, trades, pages, views
 cargo fmt --check
 cargo clippy --all-targets -- -D warnings
+tools/check-with-jei.sh                      # the same with JEI for Horizon installed (the jei feature)
 ```
 
 CI runs the same checks, then `cargo horizon-mod build` and `cargo horizon-mod check` on the package.

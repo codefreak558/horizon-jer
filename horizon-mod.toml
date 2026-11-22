@@ -18,7 +18,7 @@ capabilities = ["registries"]
 [dependencies]
 jei = { version = "^0.5", optional = true }
 
-# The exact Horizon build this native mod is made for (Nightly 2026-11-22), the same as JEI for Horizon 0.4.
+# The exact Horizon build this native mod is made for (Nightly 2026-11-22), the same as JEI for Horizon 0.5.
 [native]
 game = "26.3"
 horizon = "2b77287de099c9316278ba7ac4d83590fdb7ef30"
