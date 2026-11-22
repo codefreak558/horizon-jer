@@ -1,0 +1,20 @@
+id = "jer"
+name = "Just Enough Resources for Horizon"
+version = "0.1.0"
+description = "Where things come from: mob drops, chest loot, plant drops, enchantments, ore heights and villager trades, in a window of its own (J). An unofficial Horizon port of way2muchnoise's Just Enough Resources."
+authors = ["codefreak558"]
+license = "LicenseRef-Dont-Be-a-Jerk"
+license_url = "https://github.com/codefreak558/horizon-jer/blob/main/LICENSE"
+homepage = "https://github.com/codefreak558/horizon-jer"
+issues = "https://github.com/codefreak558/horizon-jer/issues"
+api = "0.2"
+# The data (loot tables, world generation, trades) lives on the server: the server half reads it and sends it
+# to the client half over an optional payload. Single player runs both halves.
+side = "both"
+capabilities = ["registries"]
+
+# The exact Horizon build this native mod is made for (Nightly 2026-11-22), the same as JEI for Horizon 0.4.
+[native]
+game = "26.3"
+horizon = "2b77287de099c9316278ba7ac4d83590fdb7ef30"
+mixins = "e59da9094f0c2fdda6c627fe9eff22dec6a906f0"

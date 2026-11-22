@@ -1,0 +1,63 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: fmt, clippy and tests against the pinned SDK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # The toolchain the launcher builds native mods with (the SDK's sdk.json pins it).
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.99.1
+          components: rustfmt, clippy
+      # The SDK's API crate, from the signed sdk-<commit> release, checked by SHA-256.
+      - uses: actions/cache@v4
+        with:
+          path: .horizon/sdk
+          key: sdk-${{ hashFiles('tools/fetch-sdk.sh') }}
+      - name: fetch the SDK
+        run: tools/fetch-sdk.sh
+      - name: format
+        run: cargo fmt --check
+      - name: clippy
+        run: cargo clippy --all-targets -- -D warnings
+      - name: test
+        run: cargo test
+
+  package:
+    name: cargo horizon-mod build + check (the registry's package validation)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.99.1
+      # cargo-horizon-mod from the exact Horizon commit horizon-mod.toml pins, as horizon-mods' install-tool.sh
+      # builds it when no attested prebuilt exists for the pin.
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cargo-horizon-mod
+          key: cargo-horizon-mod-2b77287de099c9316278ba7ac4d83590fdb7ef30
+      - name: install cargo-horizon-mod
+        run: |
+          if [ ! -x ~/.cargo-horizon-mod/bin/cargo-horizon-mod ]; then
+            cargo install --locked --git https://github.com/horizon-rust/horizon \
+              --rev 2b77287de099c9316278ba7ac4d83590fdb7ef30 cargo-horizon-mod --root ~/.cargo-horizon-mod
+          fi
+          echo "$HOME/.cargo-horizon-mod/bin" >> "$GITHUB_PATH"
+      - name: fetch the SDK
+        run: tools/fetch-sdk.sh
+      # Packs target/horizon-mod/jer.hmod exactly as a submission is packed, then runs the registry's checks on it.
+      - name: build the package
+        run: cargo horizon-mod build
+      - name: check the package
+        run: cargo horizon-mod check target/horizon-mod/jer.hmod

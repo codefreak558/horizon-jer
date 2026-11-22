@@ -1,0 +1,20 @@
+[package]
+# Cargo's name is not the mod's identity (horizon-mod.toml's `id` is).
+name = "jer"
+version = "0.1.0"
+edition = "2024"
+license-file = "LICENSE"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# The pinned SDK's API crate, fetched into .horizon/sdk/ by tools/fetch-sdk.sh or any `cargo horizon-mod` command.
+horizon-mod-api = { path = ".horizon/sdk/api/crates/horizon-mod-api" }
+
+# The SDK build this mod is made for.
+[package.metadata.horizon]
+sdk = "2b77287de099c9316278ba7ac4d83590fdb7ef30"
+
+[workspace]

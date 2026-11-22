@@ -1,0 +1,8 @@
+# Build outputs.
+/target
+/dist
+*.hmod
+# The pinned SDK, fetched by tools/fetch-sdk.sh or `cargo horizon-mod`.
+/.horizon/
+# Signing keys never enter the repository.
+*.key
