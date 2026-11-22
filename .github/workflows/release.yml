@@ -1,0 +1,81 @@
+name: release
+
+# Builds the mod's package (target/horizon-mod/jer.hmod) with cargo horizon-mod at the pinned Horizon commit,
+# runs the registry's checks on it, and publishes a GitHub release for the tag with the package and its SHA-256.
+# Run it from the Actions tab (Run workflow, on main, tag v0.2.0) or push a v* tag.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (must match horizon-mod.toml's version, e.g. v0.2.0)"
+        required: true
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: the tag is the manifest's version
+        run: |
+          version=$(sed -n 's/^version = "\(.*\)"/\1/p' horizon-mod.toml | head -1)
+          if [ "v$version" != "$TAG" ]; then
+            echo "::error::tag $TAG does not match horizon-mod.toml's version $version"
+            exit 1
+          fi
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.99.1
+          components: rustfmt, clippy
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cargo-horizon-mod
+          key: cargo-horizon-mod-2b77287de099c9316278ba7ac4d83590fdb7ef30
+      - name: install cargo-horizon-mod
+        run: |
+          if [ ! -x ~/.cargo-horizon-mod/bin/cargo-horizon-mod ]; then
+            cargo install --locked --git https://github.com/horizon-rust/horizon \
+              --rev 2b77287de099c9316278ba7ac4d83590fdb7ef30 cargo-horizon-mod --root ~/.cargo-horizon-mod
+          fi
+          echo "$HOME/.cargo-horizon-mod/bin" >> "$GITHUB_PATH"
+      - name: fetch the SDK
+        run: tools/fetch-sdk.sh
+      - name: test
+        run: |
+          cargo fmt --check
+          cargo clippy --all-targets -- -D warnings
+          cargo test
+          tools/check-with-jei.sh
+      - name: build and check the package
+        run: |
+          cargo horizon-mod build
+          cargo horizon-mod check target/horizon-mod/jer.hmod
+          cd target/horizon-mod
+          sha256sum jer.hmod > jer.hmod.sha256
+          cat jer.hmod.sha256
+      - name: release notes from the changelog
+        run: |
+          version="${TAG#v}"
+          awk -v v="$version" '
+            $0 ~ "^## " v "( |$)" { on = 1; next }
+            on && /^## / { exit }
+            on { print }
+          ' CHANGELOG.md > notes.md
+          {
+            echo
+            echo "Native mod for Horizon \`2b77287\` (Nightly 2026-11-22), Minecraft 26.3."
+            echo "Install: \`horizon-launcher native-build <folder> --trust-native-code\` from a checkout of this tag,"
+            echo "or install the attached \`jer.hmod\`. Native mods are not sandboxed."
+          } >> notes.md
+          cat notes.md
+      - name: publish the release
+        run: |
+          gh release create "$TAG" target/horizon-mod/jer.hmod target/horizon-mod/jer.hmod.sha256 \
+            --target "$GITHUB_SHA" --title "Just Enough Resources for Horizon $TAG" --notes-file notes.md
