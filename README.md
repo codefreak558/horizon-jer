@@ -13,6 +13,10 @@ that item (what drops it, where it generates, who trades it). In the window:
 - the arrows, the mouse wheel or the arrow keys turn pages;
 - hover an item for its chance, count and what it depends on (a player kill, Looting, Fortune, Silk Touch).
 
+> **Status: 0.1.0, not yet tested in game.** It builds against the pinned SDK and passes its unit tests and
+> the registry's package checks. Whether the server answers the biome, placed-feature and trade-set registry
+> reads (World Generation and Villager Trades depend on them) is still to be confirmed in game.
+
 ## What it shows
 
 | Page | From | Status |
