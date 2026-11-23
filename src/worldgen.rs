@@ -52,6 +52,21 @@ impl Ore {
     }
 }
 
+/// A configured feature's settings: 26.3 writes them beside its `type`, older packs inside `config`.
+fn settings(configured: &Value) -> &Value {
+    configured.get("config").unwrap_or(configured)
+}
+
+/// A block state's block: 26.3's `"minecraft:iron_ore"` or `{"id": …, "properties": …}`, or the older
+/// `{"Name": …, "Properties": …}`.
+fn state_block(state: &Value) -> Option<&str> {
+    match state {
+        Value::String(id) => Some(id),
+        Value::Object(o) => o.get("id").or_else(|| o.get("Name")).and_then(Value::as_str),
+        _ => None,
+    }
+}
+
 /// The blocks an ore feature's configuration places, or None for a feature that isn't an ore.
 pub fn ore_blocks(configured: &Value) -> Option<Vec<String>> {
     let kind = configured.get("type")?.as_str()?;
@@ -59,11 +74,8 @@ pub fn ore_blocks(configured: &Value) -> Option<Vec<String>> {
         return None;
     }
     let mut blocks = Vec::new();
-    for target in configured.get("config")?.get("targets")?.as_array()?.iter() {
-        if let Some(name) = target
-            .get("state")
-            .and_then(|s| s.get("Name"))
-            .and_then(Value::as_str)
+    for target in settings(configured).get("targets")?.as_array()?.iter() {
+        if let Some(name) = target.get("state").and_then(state_block)
             && !blocks.iter().any(|b| b == name)
         {
             blocks.push(name.to_owned());
@@ -94,9 +106,8 @@ pub fn ore(placed: &Value, configured: &Value, dimension: usize) -> Option<Ore> 
         .get("placement")
         .and_then(Value::as_array)
         .map_or(&[][..], Vec::as_slice);
-    let size = configured
-        .get("config")
-        .and_then(|c| c.get("size"))
+    let size = settings(configured)
+        .get("size")
         .and_then(Value::as_f64)
         .unwrap_or(1.0);
     let veins = tries(placement);
@@ -228,6 +239,16 @@ mod tests {
         assert!(low <= -60);
         assert!(high <= 16);
         assert!(ore.per_chunk() > 0.0);
+    }
+
+    #[test]
+    fn the_26_3_feature_form_is_read_too() {
+        let (placed, old) = diamond();
+        let new = json!({"type": "minecraft:ore", "size": 4, "discard_chance_on_air_exposure": 0.5, "targets": [
+            {"target": {"predicate_type": "minecraft:tag_match", "tag": "minecraft:stone_ore_replaceables"}, "state": "minecraft:diamond_ore"},
+            {"target": {"predicate_type": "minecraft:tag_match", "tag": "minecraft:deepslate_ore_replaceables"}, "state": {"id": "minecraft:deepslate_diamond_ore", "properties": {}}}
+        ]});
+        assert_eq!(ore(&placed, &new, 0), ore(&placed, &old, 0));
     }
 
     #[test]

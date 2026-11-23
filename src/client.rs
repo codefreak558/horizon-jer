@@ -13,6 +13,11 @@ pub const OPEN: &str = "open";
 
 /// Ticks between two asks while the server hasn't answered or the connection isn't up.
 const RETRY_TICKS: u32 = 100;
+/// Asks answered "the server doesn't have the channel" before the mod is taken as absent there: right after
+/// joining, the server's channel list may not be in yet.
+const ABSENT_AFTER: u32 = 6;
+/// Ticks to wait for the last batch of an answer before asking again.
+const ANSWER_TICKS: u32 = 400;
 /// Ticks the window keeps trying to open after the screen under it closed.
 const OPEN_RETRIES: u32 = 10;
 /// Enchantment lines on one enchantment page.
@@ -43,6 +48,10 @@ pub struct State {
     pub nav: Nav,
     /// Ticks until the next ask.
     wait: u32,
+    /// Asks the server answered with "no such channel".
+    refused: u32,
+    /// Ticks since the last ask, while its answer is still coming.
+    waited: u32,
     /// Ticks left to retry opening the window (the screen it replaces may take a tick to close).
     open_retries: u32,
     /// What the input hooks asked of the next tick.
@@ -71,6 +80,8 @@ pub fn received(batch: Pages) {
         s.pages.extend(batch.pages);
         if batch.last {
             s.remote = Remote::Complete;
+            // Pages that come after JEI was given the client's own (a late answer) go to JEI too.
+            s.bridged = false;
             // The server's pages replace a world's earlier ones; keep the client's enchantment pages.
             s.pages.sort_by_key(|p| p.tab);
         }
@@ -209,12 +220,24 @@ pub fn clear_jei(host: &mut dyn ClientHost) {
 
 fn ask(host: &mut dyn ClientHost) {
     let due = with(|s| {
-        if matches!(s.remote, Remote::Idle) {
-            if s.wait == 0 {
-                s.wait = RETRY_TICKS;
-                return true;
+        match s.remote {
+            Remote::Idle => {
+                if s.wait == 0 {
+                    s.wait = RETRY_TICKS;
+                    return true;
+                }
+                s.wait -= 1;
             }
-            s.wait -= 1;
+            // An answer that never finished (lost on a reconnect): drop what came and ask again.
+            Remote::Asked => {
+                s.waited += 1;
+                if s.waited > ANSWER_TICKS {
+                    s.pages.retain(|p| p.tab == Tab::Enchant.code());
+                    s.remote = Remote::Idle;
+                    s.wait = 0;
+                }
+            }
+            Remote::Complete | Remote::Absent => {}
         }
         false
     });
@@ -226,8 +249,16 @@ fn ask(host: &mut dyn ClientHost) {
     };
     let version = protocol::VERSION_NUMBER;
     match token.send(host, &Ask { version }) {
-        Ok(_) => with(|s| s.remote = Remote::Asked),
-        Err(PayloadSendError::UnsupportedPeer(_)) => with(|s| s.remote = Remote::Absent),
+        Ok(_) => with(|s| {
+            s.remote = Remote::Asked;
+            s.waited = 0;
+        }),
+        Err(PayloadSendError::UnsupportedPeer(_)) => with(|s| {
+            s.refused += 1;
+            if s.refused >= ABSENT_AFTER {
+                s.remote = Remote::Absent;
+            }
+        }),
         // Not connected yet, or the channel is busy: the next due tick asks again.
         Err(_) => {}
     }

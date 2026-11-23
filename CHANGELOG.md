@@ -5,6 +5,11 @@
 - Needs JEI for Horizon 0.6.x for the pages inside JEI (`jei = "^0.6"`); CI and the release check against
   JEI v0.6.1.
 - Release files carry the version: `jer-0.2.1.hmod` and `jer-0.2.1.hmod.sha256`.
+- **World generation shows again.** 26.3 moved configured features from `worldgen/configured_feature` to
+  `worldgen/feature` and wrote them without the `config` wrapper, with block states as plain ids; the ore pages
+  read both the new and the old form.
+- The client asks the server again when its answer never finishes, and takes the server as not running the mod
+  only after several refusals (right after joining, the server's channel list may not be in yet).
 
 ## 0.2.0
 

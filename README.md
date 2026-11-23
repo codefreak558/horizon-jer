@@ -13,9 +13,9 @@ that item (what drops it, where it generates, who trades it). In the window:
 - the arrows, the mouse wheel or the arrow keys turn pages;
 - hover an item for its chance, count and what it depends on (a player kill, Looting, Fortune, Silk Touch).
 
-> **Status: 0.2.1, not yet tested in game.** It builds against the pinned SDK and passes its unit tests and
-> the registry's package checks. Whether the server answers the biome, placed-feature and trade-set registry
-> reads (World Generation and Villager Trades depend on them) is still to be confirmed in game.
+> **Status: 0.2.1, tested in game with JEI for Horizon 0.6.1.** Mob drops, chest loot, world generation and
+> villager trades come from the server and show in the window and in JEI. The pages inside JEI still use JEI's
+> plain chance layout, not Java JER's (mob model, ore graph); that needs JEI's next add-on API.
 
 ## What it shows
 

@@ -230,9 +230,9 @@ fn ore_pages(host: &dyn ServerHost, tables: &BTreeMap<String, Value>) -> Vec<Pag
             continue;
         };
         let configured = match worldgen::feature_of(&placed) {
-            Some(FeatureRef::Id(c)) => {
-                read_json(host, &data_path("worldgen/configured_feature", c))
-            }
+            // 26.3 renamed `worldgen/configured_feature` to `worldgen/feature`; older packs keep the old name.
+            Some(FeatureRef::Id(c)) => read_json(host, &data_path("worldgen/feature", c))
+                .or_else(|| read_json(host, &data_path("worldgen/configured_feature", c))),
             Some(FeatureRef::Inline(v)) => Some(v.clone()),
             None => None,
         };
