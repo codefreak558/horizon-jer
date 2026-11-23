@@ -62,7 +62,10 @@ fn settings(configured: &Value) -> &Value {
 fn state_block(state: &Value) -> Option<&str> {
     match state {
         Value::String(id) => Some(id),
-        Value::Object(o) => o.get("id").or_else(|| o.get("Name")).and_then(Value::as_str),
+        Value::Object(o) => o
+            .get("id")
+            .or_else(|| o.get("Name"))
+            .and_then(Value::as_str),
         _ => None,
     }
 }
