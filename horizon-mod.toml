@@ -1,6 +1,6 @@
 id = "jer"
 name = "Just Enough Resources for Horizon"
-version = "0.2.0"
+version = "0.2.1"
 description = "Where things come from: mob drops, chest loot, plant drops, enchantments, ore heights and villager trades, in a window of its own (J). An unofficial Horizon port of way2muchnoise's Just Enough Resources."
 authors = ["codefreak558"]
 license = "LicenseRef-Dont-Be-a-Jerk"
@@ -16,9 +16,9 @@ capabilities = ["registries"]
 # JEI for Horizon shows the pages as tabs of its recipe screen (R / U) when it is installed; without it the
 # window (J) is all there is. The launcher adds the dependency and its Cargo feature.
 [dependencies]
-jei = { version = "^0.5", optional = true }
+jei = { version = "^0.6", optional = true }
 
-# The exact Horizon build this native mod is made for (Nightly 2026-11-22), the same as JEI for Horizon 0.5.
+# The exact Horizon build this native mod is made for (Nightly 2026-11-22), the same as JEI for Horizon 0.6.
 [native]
 game = "26.3"
 horizon = "2b77287de099c9316278ba7ac4d83590fdb7ef30"

@@ -9,7 +9,7 @@
 set -euo pipefail
 
 JEI_REPO="https://github.com/codefreak558/horizon-jei"
-JEI_TAG="v0.5.2"
+JEI_TAG="v0.6.1"
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 sdk="$root/.horizon/sdk/api/crates/horizon-mod-api"

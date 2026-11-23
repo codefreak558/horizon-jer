@@ -58,8 +58,10 @@ jobs:
           cargo horizon-mod build
           cargo horizon-mod check target/horizon-mod/jer.hmod
           cd target/horizon-mod
-          sha256sum jer.hmod > jer.hmod.sha256
-          cat jer.hmod.sha256
+          # The release's files carry the version: jer-0.2.1.hmod.
+          cp jer.hmod "jer-${TAG#v}.hmod"
+          sha256sum "jer-${TAG#v}.hmod" > "jer-${TAG#v}.hmod.sha256"
+          cat "jer-${TAG#v}.hmod.sha256"
       - name: release notes from the changelog
         run: |
           version="${TAG#v}"
@@ -72,10 +74,10 @@ jobs:
             echo
             echo "Native mod for Horizon \`2b77287\` (Nightly 2026-11-22), Minecraft 26.3."
             echo "Install: \`horizon-launcher native-build <folder> --trust-native-code\` from a checkout of this tag,"
-            echo "or install the attached \`jer.hmod\`. Native mods are not sandboxed."
+            echo "or install the attached \`jer-${TAG#v}.hmod\`. Native mods are not sandboxed."
           } >> notes.md
           cat notes.md
       - name: publish the release
         run: |
-          gh release create "$TAG" target/horizon-mod/jer.hmod target/horizon-mod/jer.hmod.sha256 \
+          gh release create "$TAG" "target/horizon-mod/jer-${TAG#v}.hmod" "target/horizon-mod/jer-${TAG#v}.hmod.sha256" \
             --target "$GITHUB_SHA" --title "Just Enough Resources for Horizon $TAG" --notes-file notes.md

@@ -1,4 +1,4 @@
-//! JER's pages as JEI categories (JEI for Horizon 0.5's add-on API): one category per tab, one recipe per page.
+//! JER's pages as JEI categories (JEI for Horizon 0.6's add-on API): one category per tab, one recipe per page.
 //!
 //! This half is plain data with no game and no `jei` types in it, so it builds and is tested without JEI. The
 //! few lines that hand it to JEI sit in `client::send_to_jei`, inside `mod_api::if_installed!`.

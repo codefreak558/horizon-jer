@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1
+
+- Needs JEI for Horizon 0.6.x for the pages inside JEI (`jei = "^0.6"`); CI and the release check against
+  JEI v0.6.1.
+- Release files carry the version: `jer-0.2.1.hmod` and `jer-0.2.1.hmod.sha256`.
+
 ## 0.2.0
 
 - **Pages inside JEI.** With [JEI for Horizon](https://github.com/codefreak558/horizon-jei) 0.5 or newer

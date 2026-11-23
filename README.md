@@ -13,7 +13,7 @@ that item (what drops it, where it generates, who trades it). In the window:
 - the arrows, the mouse wheel or the arrow keys turn pages;
 - hover an item for its chance, count and what it depends on (a player kill, Looting, Fortune, Silk Touch).
 
-> **Status: 0.2.0, not yet tested in game.** It builds against the pinned SDK and passes its unit tests and
+> **Status: 0.2.1, not yet tested in game.** It builds against the pinned SDK and passes its unit tests and
 > the registry's package checks. Whether the server answers the biome, placed-feature and trade-set registry
 > reads (World Generation and Villager Trades depend on them) is still to be confirmed in game.
 
@@ -28,12 +28,12 @@ that item (what drops it, where it generates, who trades it). In the window:
 | Villager trades | every trade set and trade (26.3's data-driven trades), by profession and level, the wandering trader included | ported |
 | Enchantments | the enchantments an enchanting table can put on an item, their levels and the power each needs | ported (no per-level chances) |
 | Mob experience, spawn light levels, enchantment chances | | missing: see [docs/missing-hooks.md](docs/missing-hooks.md) |
-| Pages inside JEI | one tab per page type in JEI for Horizon 0.5's recipe screen (R / U), when JEI is installed | ported |
+| Pages inside JEI | one tab per page type in JEI for Horizon 0.6's recipe screen (R / U), when JEI is installed | ported |
 | Custom `world-gen.json`, the JER API for other mods | | not ported |
 
 ### With JEI
 
-If [JEI for Horizon](https://github.com/codefreak558/horizon-jei) 0.5 or newer is installed, JER also gives it its
+If [JEI for Horizon](https://github.com/codefreak558/horizon-jei) 0.6.x is installed, JER also gives it its
 pages: a tab per page type in JEI's recipe screen. R over an item lists where it comes from (rotten flesh shows
 the zombie's drops, a diamond its ore and the mobs and chests that give it) and U lists what it is used for (an
 emerald shows the villager trades that take it). The window (J) works with or without JEI. The dependency is
